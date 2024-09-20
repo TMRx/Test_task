@@ -19,7 +19,8 @@ def nov_api():
     
     try:
         response = requests.post(url, headers=headers, json=payload)
-        response.raise_for_status()  
+        response.raise_for_status()
+        data = response.json()
         
         if 'data' in data:
             return data['data']
@@ -36,10 +37,41 @@ def nov_api():
         
         
         
-def get_exl():
-    pass 
+def get_exl(data, filename="poshta_data.xlsx"):
+    try:
+        if not data:
+            raise ValueError("No data received")
+        
+        
+        rows = []
+        for entry in data:
+            rows.append({
+                "Область": entry.get('RegionDescription', ''),
+                "Місто": entry.get('CityDescription', ''),
+                "Відділення": entry.get('Description', '')
+            })
+
+        
+        df = pd.DataFrame(rows)
+        df.to_excel(filename, index=False)
+        print(f'Дані зебережено у файл {filename}')
+        
+        
+    except ValueError as ve:
+        print(f"Помилка: {ve}")
+    except KeyError as ke:
+        print(f"Помилка: Відсутній ключ у даних - {ke}")
+    except pd.errors.EmptyDataError:
+        print("Помилка: Дані для збереження порожні.")
+    except PermissionError:
+        print(f"Помилка: Немає дозволу на запис файлу {filename}. Перевірте права доступу.")
+    except Exception as e:
+        print(f"Виникла непередбачена помилка: {e}")
 
 
 if __name__ == '__main__':
-    nov_api()
-    get_exl()
+    api_data = nov_api()
+    if api_data: 
+        get_exl(api_data)
+    else:
+        print("Не вдалося отримати дані з API.")    
