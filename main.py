@@ -2,7 +2,7 @@ import requests
 import pandas as pd
 
 
-API_KEY = '83c88a6c30f00a4eadc0f2d2245b07db'
+API_KEY = ''
 
 
 def nov_api():
